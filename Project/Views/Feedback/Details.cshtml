@@ -1,0 +1,156 @@
+﻿@model Project.Models.Book
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var approvedFeedbacks = Model.Feedbacks != null
+        ? Model.Feedbacks.Where(f => f.IsApproved).ToList()
+        : new List<Project.Models.Feedback>();
+    double avgRating = approvedFeedbacks.Any()
+        ? approvedFeedbacks.Average(f => f.Rating)
+        : 0;
+}
+
+<div class="page-header">
+    <h2>📖 @Model.Title</h2>
+    @Html.ActionLink("← Back to Books", "Index", null,
+        new { @class = "btn btn-secondary" })
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div style="display:grid; grid-template-columns:auto 1fr; gap:32px; align-items:start;">
+
+        <div style="width:180px; height:250px; background:linear-gradient(135deg,#1e3a8a,#3b82f6); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:4rem; flex-shrink:0;">
+            📖
+        </div>
+
+        <div>
+            <h1 style="margin-bottom:6px;">@Model.Title</h1>
+            <p style="color:#6b7280; font-size:1.1rem; margin-bottom:16px;">
+                by <strong>@Model.Author</strong>
+            </p>
+
+            @if (approvedFeedbacks.Any())
+            {
+                <div style="margin-bottom:16px;">
+                    <span style="color:#f59e0b; font-size:1.4rem;">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(avgRating))
+                            {<text>★</text> }
+                        else
+                        { <text>☆</text>}
+                }
+                    </span>
+                    <span style="color:#6b7280; font-size:0.9rem; margin-left:6px;">
+                        @avgRating.ToString("0.0") / 5
+                        (@approvedFeedbacks.Count review(s))
+                    </span>
+                </div>
+            }
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 32px; margin-bottom:20px;">
+                <div>
+                    <span style="color:#6b7280; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Genre</span>
+                    <div><span class="badge badge-info">@Model.Genre</span></div>
+                </div>
+                <div>
+                    <span style="color:#6b7280; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">ISBN</span>
+                    <div style="font-size:0.9rem;">@Model.ISBN</div>
+                </div>
+                <div>
+                    <span style="color:#6b7280; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Year</span>
+                    <div>@Model.PublicationYear</div>
+                </div>
+                <div>
+                    <span style="color:#6b7280; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Copies</span>
+                    <div>@Model.TotalCopies</div>
+                </div>
+                <div>
+                    <span style="color:#6b7280; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Library</span>
+                    <div>@(Model.Library != null ? Model.Library.Name : "-")</div>
+                </div>
+                <div>
+                    <span style="color:#6b7280; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Status</span>
+                    <div>
+                        @if (Model.IsAvailable)
+                        {
+                            <span class="badge badge-success">Available</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Borrowed</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Summary))
+            {
+                <p style="color:#374151; line-height:1.7;">@Model.Summary</p>
+            }
+
+            <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+                @if (Request.IsAuthenticated && User.IsInRole("Member")
+                     && Model.IsAvailable)
+                {
+                    @Html.ActionLink("📚 Borrow This Book", "Borrow", "Borrowing",
+                        new { bookId = Model.BookId },
+                        new { @class = "btn btn-success" })
+                }
+                @if (Request.IsAuthenticated && User.IsInRole("Member"))
+                {
+                    @Html.ActionLink("⭐ Leave a Review", "Create", "Feedback",
+                        new { bookId = Model.BookId },
+                        new { @class = "btn btn-warning" })
+                }
+                @if (Request.IsAuthenticated && User.IsInRole("Librarian"))
+                {
+                    @Html.ActionLink("Edit", "Edit",
+                        new { id = Model.BookId },
+                        new { @class = "btn btn-primary" })
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom:20px; color:#1e3a8a;">
+        💬 Reviews (@approvedFeedbacks.Count)
+    </h3>
+
+    @if (approvedFeedbacks.Any())
+    {
+        foreach (var f in approvedFeedbacks.OrderByDescending(f => f.SubmittedDate))
+        {
+            <div style="border-left:3px solid #1e3a8a; padding:12px 16px; margin-bottom:14px; background:#f9fafb; border-radius:0 8px 8px 0;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <strong>@(f.Member != null ? f.Member.FullName : "Member")</strong>
+                    <span style="color:#6b7280; font-size:0.85rem;">
+                        @f.SubmittedDate.ToShortDateString()
+                    </span>
+                </div>
+                <div style="color:#f59e0b; margin-bottom:6px;">
+                    @for (int i = 0; i < f.Rating; i++)
+                    {<text>★</text>}
+                    @for (int i = f.Rating; i < 5; i++)
+                    {<text>☆</text>}
+                </div>
+                <p style="color:#374151; margin:0;">@f.Comment</p>
+            </div>
+        }
+    }
+    else
+    {
+        <p style="color:#6b7280;">
+            No reviews yet.
+            @if (Request.IsAuthenticated && User.IsInRole("Member"))
+            {
+                @Html.ActionLink("Be the first to review this book!",
+                    "Create", "Feedback",
+                    new { bookId = Model.BookId },
+                    new { style = "color:#1e3a8a; font-weight:600;" })
+            }
+        </p>
+    }
+</div>

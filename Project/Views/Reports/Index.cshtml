@@ -1,0 +1,73 @@
+﻿@{
+    ViewBag.Title = "Reports Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h2>📊 Reports Dashboard</h2>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Books</div>
+        <div class="stat-value">@ViewBag.TotalBooks</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Total Members</div>
+        <div class="stat-value">@ViewBag.TotalMembers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Libraries</div>
+        <div class="stat-value">@ViewBag.TotalLibraries</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Active Borrowings</div>
+        <div class="stat-value">@ViewBag.ActiveBorrowings</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-label">Overdue Books</div>
+        <div class="stat-value">@ViewBag.OverdueCount</div>
+    </div>
+    <div class="stat-card yellow">
+        <div class="stat-label">Outstanding Fines</div>
+        <div class="stat-value">$@(((decimal)ViewBag.OutstandingFines).ToString("0.00"))</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom:20px; color:#1e3a8a;">Detailed Reports</h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px;">
+
+        @Html.ActionLink("⏰ Overdue Books",
+            "OverdueBooks", null,
+            new
+                 {
+                     @class = "btn btn-danger btn-block",
+                  style = "padding:16px; font-size:1rem;"
+                 })
+
+        @Html.ActionLink("🔥 Most Popular Books",
+            "PopularBooks", null,
+            new
+                 {
+                     @class = "btn btn-primary btn-block",
+                  style = "padding:16px; font-size:1rem;"
+                 })
+
+        @Html.ActionLink("👥 Most Active Members",
+            "ActiveMembers", null,
+            new
+                 {
+                     @class = "btn btn-success btn-block",
+                  style = "padding:16px; font-size:1rem;"
+                 })
+
+        @Html.ActionLink("📈 Borrowing Trends",
+            "BorrowingTrends", null,
+            new
+                 {
+                     @class = "btn btn-warning btn-block",
+                  style = "padding:16px; font-size:1rem;"
+                 })
+    </div>
+</div>

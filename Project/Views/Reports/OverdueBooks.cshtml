@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Project.Models.BorrowingTransaction>
+@{
+    ViewBag.Title = "Overdue Books";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h2>⏰ Overdue Books</h2>
+    @Html.ActionLink("← Back to Reports", "Index", null,
+        new { @class = "btn btn-secondary" })
+</div>
+
+@if (Model.Any())
+{
+    <div class="alert alert-error">
+        <strong>@Model.Count() book(s) overdue.</strong>
+        Total fines accruing: <strong>$@Model.Sum(t => t.FineAmount).ToString("0.00")</strong>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Member</th>
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
+                    <th>Days Overdue</th>
+                    <th>Fine</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    var daysOverdue = (DateTime.Now - t.DueDate).Days;
+                    <tr>
+                        <td><strong>@(t.Book != null ? t.Book.Title : "-")</strong></td>
+                        <td>@(t.Member != null ? t.Member.FullName : "-")</td>
+                        <td>@t.BorrowDate.ToShortDateString()</td>
+                        <td>@t.DueDate.ToShortDateString()</td>
+                        <td>
+                            <span class="badge badge-danger">
+                                @daysOverdue days
+                            </span>
+                        </td>
+                        <td>
+                            <strong style="color:#ef4444;">
+                                $@t.FineAmount.ToString("0.00")
+                            </strong>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div style="background:white; border-radius:10px; padding:60px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <div style="font-size:3rem; margin-bottom:12px;">✅</div>
+        <p style="color:#6b7280; font-size:1.1rem;">
+            No overdue books — all loans are on schedule!
+        </p>
+    </div>
+}

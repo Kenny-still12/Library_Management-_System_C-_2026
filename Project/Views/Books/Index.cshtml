@@ -1,0 +1,135 @@
+﻿@model IEnumerable<Project.Models.Book>
+@{
+    ViewBag.Title = "Browse Books";
+    var genres = ViewBag.Genres as List<string>;
+}
+
+<div class="page-header">
+    <h2>📚 Browse Books</h2>
+    @if (Request.IsAuthenticated && User.IsInRole("Librarian"))
+    {
+        @Html.ActionLink("+ Add New Book", "Create", null, new { @class = "btn btn-success" })
+    }
+</div>
+
+@using (Html.BeginForm("Index", "Books", FormMethod.Get))
+{
+    <div style="background:white; padding:16px 20px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:24px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+
+        @Html.TextBox("search", ViewContext.RouteData.Values["search"] as string,
+            new
+                 {
+                     placeholder = "Search by title or author...",
+                  style = "padding:9px 13px; border:1px solid #d1d5db; border-radius:6px; font-size:0.95rem; width:280px;"
+                 })
+
+        <select name="genre" style="padding:9px 13px; border:1px solid #d1d5db; border-radius:6px; font-size:0.95rem;">
+            <option value="">-- All Genres --</option>
+            @if (genres != null)
+            {
+                foreach (var g in genres)
+                {
+                    <option value="@g">@g</option>
+                }
+            }
+        </select>
+
+        <button type="submit" class="btn btn-primary">🔍 Search</button>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">✕ Clear</a>
+    </div>
+}
+
+@if (Model.Any())
+{
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>ISBN</th>
+                    <th>Library</th>
+                    <th>Year</th>
+                    <th>Copies</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var book in Model)
+                {
+                    <tr>
+                        <td><strong>@book.Title</strong></td>
+                        <td>@book.Author</td>
+                        <td>
+                            <span class="badge badge-info">@book.Genre</span>
+                        </td>
+                        <td style="font-size:0.82rem; color:#6b7280;">@book.ISBN</td>
+                        <td>@(book.Library != null ? book.Library.Name : "-")</td>
+                        <td>@book.PublicationYear</td>
+                        <td style="text-align:center;">@book.TotalCopies</td>
+                        <td>
+                            @if (book.IsAvailable)
+                            {
+                                <span class="badge badge-success">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Borrowed</span>
+                            }
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+
+                                @Html.ActionLink("Details", "Details",
+                                    new { id = book.BookId },
+                                    new { @class = "btn btn-primary btn-sm" })
+
+                                @if (Request.IsAuthenticated
+                                     && User.IsInRole("Member")
+                                     && book.IsAvailable)
+                                {
+                                    @Html.ActionLink("Borrow", "Borrow", "Borrowing",
+                                        new { bookId = book.BookId },
+                                        new { @class = "btn btn-success btn-sm" })
+                                }
+
+                                @if (!book.IsAvailable
+                                     && Request.IsAuthenticated
+                                     && User.IsInRole("Member"))
+                                {
+                                    <span class="badge badge-danger"
+                                          style="padding:5px 10px; font-size:0.78rem;">
+                                        Not Available
+                                    </span>
+                                }
+
+                                @if (Request.IsAuthenticated && User.IsInRole("Librarian"))
+                                {
+                                    @Html.ActionLink("Edit", "Edit",
+                                        new { id = book.BookId },
+                                        new { @class = "btn btn-warning btn-sm" })
+                                    @Html.ActionLink("Delete", "Delete",
+                                        new { id = book.BookId },
+                                        new { @class = "btn btn-danger btn-sm" })
+                                }
+
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div style="background:white; border-radius:10px; padding:60px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <div style="font-size:3rem; margin-bottom:12px;">📭</div>
+        <p style="color:#6b7280; font-size:1.1rem;">No books found.</p>
+        <a href="@Url.Action("Index")" class="btn btn-primary" style="margin-top:16px;">
+            Clear Search
+        </a>
+    </div>
+}

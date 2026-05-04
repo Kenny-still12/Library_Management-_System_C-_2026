@@ -1,0 +1,75 @@
+﻿@{
+    ViewBag.Title = "Borrowing Trends";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var trends = ViewBag.Trends as List<Project.Controllers.BorrowingTrendItem>;
+}
+
+<div class="page-header">
+    <h2>📈 Borrowing Trends</h2>
+    @Html.ActionLink("← Back to Reports", "Index", null,
+        new { @class = "btn btn-secondary" })
+</div>
+
+@if (trends != null && trends.Any())
+{
+    <div class="card">
+        <h3 style="margin-bottom:20px; color:#1e3a8a;">Monthly Borrowing Activity</h3>
+        @{
+            int maxCount = trends.Max(t => t.Count);
+        }
+        @foreach (var t in trends)
+        {
+            int barWidth = maxCount > 0 ? (int)((double)t.Count / maxCount * 100) : 0;
+            <div style="margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:80px; font-size:0.85rem; color:#6b7280; text-align:right;">
+                        @t.Period
+                    </div>
+                    <div style="flex:1; background:#f3f4f6; border-radius:4px; height:28px; overflow:hidden;">
+                        <div style="background:#1e3a8a; height:100%; width:@(barWidth)%; border-radius:4px; transition:width 0.5s; display:flex; align-items:center; padding-left:8px;">
+                            @if (barWidth > 15)
+                            {
+                                <span style="color:white; font-size:0.8rem; font-weight:600;">@t.Count</span>
+                            }
+                        </div>
+                    </div>
+                    @if (barWidth <= 15)
+                    {
+                        <span style="font-size:0.85rem; font-weight:600; color:#1e3a8a;">@t.Count</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="table-wrapper" style="margin-top:24px;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Period</th>
+                    <th>Total Borrowings</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in trends)
+                {
+                    <tr>
+                        <td>@t.Period</td>
+                        <td>
+                            <span class="badge badge-info">@t.Count</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div style="background:white; border-radius:10px; padding:60px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <div style="font-size:3rem; margin-bottom:12px;">📊</div>
+        <p style="color:#6b7280; font-size:1.1rem;">
+            No borrowing data yet. Data appears here once members start borrowing books.
+        </p>
+    </div>
+}

@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "Home";
+    var groupMembers = ViewBag.GroupMembers as List<Project.Models.GroupMember>;
+}
+
+@* ── HERO BANNER ─────────────────────────────────────── *@
+<div style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%); color:white; padding:50px 40px; border-radius:12px; text-align:center; margin-bottom:32px;">
+    <h1 style="font-size:2.2rem; margin-bottom:12px;">Welcome to KOI Library Management System</h1>
+    <p style="font-size:1.05rem; opacity:0.9; margin-bottom:24px;">Browse thousands of books, borrow online, and manage your reading — all in one place.</p>
+    @Html.ActionLink("Browse Books →", "Index", "Books", null, new { style = "background:#f59e0b; color:white; padding:12px 28px; border-radius:8px; font-weight:700; font-size:1rem;" })
+</div>
+
+@* ── GROUP MEMBERS TABLE (required by assessment) ────── *@
+<div style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%); border:2px solid #3b82f6; border-radius:12px; padding:28px; margin-bottom:32px;">
+    <h2 style="color:#1e3a8a; text-align:center; margin-bottom:20px;">📋 Project Team — ICT272 Assessment 3A</h2>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (groupMembers != null && groupMembers.Any())
+                {
+                    foreach (var m in groupMembers)
+                    {
+                        <tr>
+                            <td><strong>@m.StudentId</strong></td>
+                            <td>@m.FullName</td>
+                            <td>@m.Role</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" style="text-align:center; color:#6b7280; padding:24px;">
+                            No group members found. Check your database seed data.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

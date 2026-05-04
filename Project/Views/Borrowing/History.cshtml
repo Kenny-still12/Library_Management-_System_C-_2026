@@ -1,0 +1,99 @@
+﻿@model IEnumerable<Project.Models.BorrowingTransaction>
+@{
+    ViewBag.Title = "My Borrowing History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h2>📚 My Borrowing History</h2>
+</div>
+
+@{
+    var total = Model.Count();
+    var totalFines = Model.Sum(t => t.FineAmount);
+    var returned = Model.Count(t =>
+        t.Status == Project.Models.BorrowingStatus.Returned);
+}
+
+<div class="stats-grid" style="margin-bottom:24px;">
+    <div class="stat-card">
+        <div class="stat-label">Total Borrowed</div>
+        <div class="stat-value">@total</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Returned</div>
+        <div class="stat-value">@returned</div>
+    </div>
+    <div class="stat-card yellow">
+        <div class="stat-label">Total Fines</div>
+        <div class="stat-value">$@totalFines.ToString("0.00")</div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Borrowed</th>
+                    <th>Due Date</th>
+                    <th>Returned</th>
+                    <th>Status</th>
+                    <th>Fine</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td><strong>@(t.Book != null ? t.Book.Title : "-")</strong></td>
+                        <td>@t.BorrowDate.ToShortDateString()</td>
+                        <td>@t.DueDate.ToShortDateString()</td>
+                        <td>
+                            @(t.ReturnDate.HasValue
+                                ? t.ReturnDate.Value.ToShortDateString()
+                                : "-")
+                        </td>
+                        <td>
+                            @if (t.Status == Project.Models.BorrowingStatus.Returned)
+                            {
+                                <span class="badge badge-success">Returned</span>
+                            }
+                            else if (t.Status == Project.Models.BorrowingStatus.Overdue)
+                            {
+                                <span class="badge badge-danger">Overdue</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-info">Borrowed</span>
+                            }
+                        </td>
+                        <td>
+                            @if (t.FineAmount > 0)
+                            {
+                                <span style="color:#ef4444; font-weight:600;">
+                                    $@t.FineAmount.ToString("0.00")
+                                    @(t.FinePaid ? "(Paid)" : "(Unpaid)")
+                                </span>
+                            }
+                            else
+                            {
+                                <text>-</text>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div style="background:white; border-radius:10px; padding:60px; text-align:center;">
+        <p style="color:#6b7280;">No borrowing history yet.</p>
+        @Html.ActionLink("Browse Books", "Index", "Books",
+            null, new { @class = "btn btn-primary", style = "margin-top:16px;" })
+    </div>
+}

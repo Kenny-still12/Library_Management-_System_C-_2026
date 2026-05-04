@@ -1,0 +1,114 @@
+﻿@model IEnumerable<Project.Models.BorrowingTransaction>
+@{
+    ViewBag.Title = User.IsInRole("Librarian") ? "All Transactions" : "My Borrowings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h2>📋 @ViewBag.Title</h2>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    @if (User.IsInRole("Librarian"))
+                    {
+                        <th>Member</th>
+}
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Fine</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td><strong>@(t.Book != null ? t.Book.Title : "-")</strong></td>
+                        @if (User.IsInRole("Librarian"))
+                        {
+                            <td>@(t.Member != null ? t.Member.FullName : "-")</td>
+                        }
+                        <td>@t.BorrowDate.ToShortDateString()</td>
+                        <td>@t.DueDate.ToShortDateString()</td>
+                        <td>
+                            @if (t.Status == Project.Models.BorrowingStatus.Borrowed)
+                            {
+                                <span class="badge badge-info">Borrowed</span>
+                            }
+                            else if (t.Status == Project.Models.BorrowingStatus.Overdue)
+                            {
+                                <span class="badge badge-danger">Overdue</span>
+                            }
+                            else if (t.Status == Project.Models.BorrowingStatus.Returned)
+                            {
+                                <span class="badge badge-success">Returned</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">Reserved</span>
+                            }
+                        </td>
+                        <td>
+                            @if (t.FineAmount > 0)
+                            {
+                                <span style="color:#ef4444; font-weight:600;">
+                                    $@t.FineAmount.ToString("0.00")
+                                </span>
+                                if (t.FinePaid)
+                                {
+                                    <span class="badge badge-success">Paid</span>
+                                }
+                            }
+                            else
+                            {
+                                <span style="color:#6b7280;">-</span>
+                            }
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                @if (User.IsInRole("Member") &&
+                                     t.Status == Project.Models.BorrowingStatus.Borrowed)
+                                {
+                                    @Html.ActionLink("Renew", "Renew",
+                                        new { id = t.TransactionId },
+                                        new { @class = "btn btn-warning btn-sm" })
+                                }
+                                @if (User.IsInRole("Librarian") &&
+                                     (t.Status == Project.Models.BorrowingStatus.Borrowed ||
+                                      t.Status == Project.Models.BorrowingStatus.Overdue))
+                                {
+                                    @Html.ActionLink("Return", "Return",
+                                        new { id = t.TransactionId },
+                                        new { @class = "btn btn-success btn-sm" })
+                                }
+                                @if (User.IsInRole("Librarian") &&
+                                     t.FineAmount > 0 && !t.FinePaid)
+                                {
+                                    @Html.ActionLink("Mark Paid", "MarkFinePaid",
+                                        new { id = t.TransactionId },
+                                        new { @class = "btn btn-primary btn-sm" })
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div style="background:white; border-radius:10px; padding:60px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <div style="font-size:3rem; margin-bottom:12px;">📭</div>
+        <p style="color:#6b7280; font-size:1.1rem;">No borrowing transactions yet.</p>
+        @Html.ActionLink("Browse Books", "Index", "Books",
+            null, new { @class = "btn btn-primary", style = "margin-top:16px;" })
+    </div>
+}

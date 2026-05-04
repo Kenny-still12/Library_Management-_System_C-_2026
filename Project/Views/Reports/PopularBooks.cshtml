@@ -1,0 +1,73 @@
+﻿@model IEnumerable<Project.Models.Book>
+@{
+    ViewBag.Title = "Most Popular Books";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h2>🔥 Most Popular Books</h2>
+    @Html.ActionLink("← Back to Reports", "Index", null,
+        new { @class = "btn btn-secondary" })
+</div>
+
+<div class="table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Total Borrows</th>
+                <th>Available</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{int rank = 1;}
+            @foreach (var b in Model)
+            {
+                <tr>
+                    <td>
+                        @if (rank == 1)
+                        {
+                            <span style="font-size:1.4rem;">🥇</span>
+                        }
+                        else if (rank == 2)
+                        {
+                            <span style="font-size:1.4rem;">🥈</span>
+                        }
+                        else if (rank == 3)
+                        {
+                            <span style="font-size:1.4rem;">🥉</span>
+                        }
+                        else
+                        {
+                            <span style="color:#6b7280;">#@rank</span>
+                        }
+                    </td>
+                    <td><strong>@b.Title</strong></td>
+                    <td>@b.Author</td>
+                    <td><span class="badge badge-info">@b.Genre</span></td>
+                    <td>
+                        <span class="badge badge-info">
+                            @(b.BorrowingTransactions != null
+                                ? b.BorrowingTransactions.Count
+                                : 0) times
+                        </span>
+                    </td>
+                    <td>
+                        @if (b.IsAvailable)
+                        {
+                            <span class="badge badge-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">No</span>
+                        }
+                    </td>
+                </tr>
+                rank++;
+            }
+        </tbody>
+    </table>
+</div>

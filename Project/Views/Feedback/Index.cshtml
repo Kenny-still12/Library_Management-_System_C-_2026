@@ -1,0 +1,85 @@
+﻿@model IEnumerable<Project.Models.Feedback>
+@{
+    ViewBag.Title = "Manage Feedback";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h2>💬 Member Feedback</h2>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Member</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>
+                                @(f.Book != null ? f.Book.Title : "-")
+                            </strong>
+                        </td>
+                        <td>@(f.Member != null ? f.Member.FullName : "-")</td>
+                        <td>
+                            <span style="color:#f59e0b; font-size:1rem;">
+                                @for (int i = 0; i < f.Rating; i++)
+                                {
+                                    <text>★</text>
+                                }
+                                @for (int i = f.Rating; i < 5; i++)
+                                {
+                                    <text>☆</text>
+                                }
+                            </span>
+                        </td>
+                        <td style="max-width:250px;">@f.Comment</td>
+                        <td>@f.SubmittedDate.ToShortDateString()</td>
+                        <td>
+                            @if (f.IsApproved)
+                            {
+                                <span class="badge badge-success">Approved</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">Pending</span>
+                            }
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:6px;">
+                                @if (!f.IsApproved)
+                                {
+                                    @Html.ActionLink("Approve", "Approve",
+                                        new { id = f.FeedbackId },
+                                        new { @class = "btn btn-success btn-sm" })
+                                }
+                                @Html.ActionLink("Delete", "Delete",
+                                    new { id = f.FeedbackId },
+                                    new { @class = "btn btn-danger btn-sm" })
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div style="background:white; border-radius:10px; padding:60px; text-align:center;">
+        <div style="font-size:3rem; margin-bottom:12px;">💬</div>
+        <p style="color:#6b7280;">No feedback submitted yet.</p>
+    </div>
+}
